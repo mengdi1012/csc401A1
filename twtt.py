@@ -12,6 +12,19 @@ def twtt2(tw):
    tw = tw.replace("&amp;",'&').replace("&lt;",'<').replace("&gt;",'>')\
    .replace("&quot;",'"').replace("&#39;","'")
    return tw
+
+def twtt3(tw):
+   tw = re.sub(r'([^\w\d])(http://|https://|www\.)[^\s\"]+',r'\1',tw)
+   return tw
+
+def twtt4(tw):
+   tw = re.sub(r'[@#]([\w\d]+)',r'\1',tw)
+   return tw
+
+
+def twtt5(tw):
+   return tw
+
    
 if __name__ == "__main__":
 
@@ -29,9 +42,16 @@ if __name__ == "__main__":
          or (count >= 800000+X*10000):
          twtt = twtt1(line.strip())
          twtt = twtt2(twtt)
+         twtt = twtt3(twtt)
+         twtt = twtt4(twtt)
+         #print count-10000*X
+         m = re.match(r'"(\d)"(,[^,]+){4},"(.+)"',twtt)
+         print >>resultfile, '<A='+m.group(1)+'>'
+         twtt = twtt5(m.group(3))
          
-         print >>resultfile, twtt
          
+         print >>resultfile,twtt
+
       count+=1
          
    resultfile.close()

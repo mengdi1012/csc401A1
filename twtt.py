@@ -75,6 +75,9 @@ def twtt8(tw,tagger):
      
     return result.strip()
 
+def twtt9(pol,twtt):
+    return '<A='+pol+'>\n' + twtt
+    
 if __name__ == "__main__":
 
    if len(sys.argv) != 4:
@@ -105,24 +108,27 @@ if __name__ == "__main__":
    count = 0
 
    tagger = NLPlib.NLPlib()
-   
+   is_train_data = sys.argv[1].find("train") != -1
    while count <= 800000+X*10000+9999:
       line = rawfile.readline()
-      if (count >= X*10000 and count <= X*10000+9999) \
-         or (count >= 800000+X*10000):
-         twtt = twtt1(line.strip())
+      if not line:
+          break
+      if (not is_train_data or (count >= X*10000 and count <= X*10000+9999) \
+         or (count >= 800000+X*10000)):
+         m = re.match(r'"(\d)"(,[^,]+){4},"(.+)"',line)
+         if not m:
+             print 'format error: ' + line + count
+             exit(0)
+         polarity = m.group(1)
+         twtt = twtt1(m.group(3))
          twtt = twtt2(twtt)
          twtt = twtt3(twtt)
          twtt = twtt4(twtt)
          #print count-10000*X
-         m = re.match(r'"(\d)"(,[^,]+){4},"(.+)"',twtt)
-         print >>resultfile, '<A='+m.group(1)+'>'
-         twtt = twtt5(m.group(3),abbr)
+         twtt = twtt5(twtt,abbr)
          twtt = twtt7(twtt, abbr)
          twtt = twtt8(twtt,tagger)
-         
-         print >>resultfile,twtt
-
+         print >>resultfile, twtt9(polarity, twtt)
       count+=1
          
    resultfile.close()

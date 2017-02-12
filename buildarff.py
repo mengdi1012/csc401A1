@@ -3,13 +3,20 @@ import sys
 import os
 import re
 
-mordern_slang = dict.fromkeys(['smh', 'fwb', 'lmfao', 'lmao', 'lms', 'tbh', 'rofl', 'wtf', 'bff',\
-            'wyd', 'lylc', 'brb', 'atm','lol','imao', 'sml', 'btw','bw', 'imho', 'fyi', 'ppl', 'sob', 'ttyl',\
-            'imo', 'ltr', 'thx', 'kk', 'omg', 'ttys', 'afn', 'bbs', 'cya', 'ez', 'f2f', 'gtr',\
-            'ic', 'jk', 'k', 'ly', 'ya', 'nm', 'np', 'plz', 'ru', 'so', 'tc', 'tmi', 'ym', 'ur', 'u', 'sol'])
+mordern_slang = {}
+pos_words = {}
+neg_words = {}
 
+
+def load_list(filename,dic):
+   f = open(filename)
+   for line in f.readlines():
+      if not line.startswith('#'):
+         dic[line.strip()] = True
+   f.close()
+   
 def collecting_data(twtt):
-   list_data=[0 for i in range(24)]
+   list_data=[0 for i in range(26)]
    list = twtt.split('\n')
    features = ''
    features += str(len(list)-1 )+','
@@ -37,11 +44,15 @@ def collecting_data(twtt):
    list_data[20]= str(feat21(text))
    list_data[21]= str(feat22(text))
    list_data[22]= str(feat23(text))
-   m = re.match(r'<A=(\d)>',list[0])
+   #list_data[23]= str(feat24(text))
+   list_data[23]= str(feat25(text))
+   list_data[24]= str(feat26(text))
    #polarity number
-   list_data[20] = m.group(1)
+   m = re.match(r'<A=(\d)>',list[0])
+  
+   list_data[-1] = m.group(1)
    
-   return ','.join(list_data[0:20])
+   return ','.join(list_data)
 
 
 def feat1(twtt):
@@ -157,21 +168,46 @@ def feat20(twtt):
    return len(list)-1
 
 def feat21(twtt):
-   #negative emoji :( ;( -( :;(
-   regex = re.compile(r"[:;\-\']\(/[\w]+")
+   #negative emoji :( ;( -(  ): );
+   regex = re.compile(r"([:;\-\']\(|\)[:;])/[\w]+")
    match = regex.findall(twtt)
    return len(match) 
 
 def feat22(twtt):
-   #positive emoji :) ;) -) ;D :D XD :P
-   regex = re.compile(r"([:;\-][\)DP]|^XD|^xD)/[\w]+")
+   #positive emoji :) ;) -) ;D :D XD :P (: (;
+   regex = re.compile(r"([:;\-][\)DP]|^XD|^xD|\([;:])/[\w]+")
    match = regex.findall(twtt)
    return len(match) 
 
 def feat23(twtt):
-   regex = re.compile(r"^(not|no|never|'t|deny|nobody|nonsense)/",re.IGNORECASE)
+   regex = re.compile(r"^(omg|wtf|u|ppl|sob|so)/",re.IGNORECASE)
    match = regex.findall(twtt)
    return len(match)
+
+def feat24(twtt):
+   regex = re.compile(r"^(btw|thx|lol|ya|k|ru)/",re.IGNORECASE)
+   match = regex.findall(twtt)
+   return len(match)
+
+def feat25(twtt):
+   list_word = twtt.split()
+   count = 0;
+   for word in list_word:
+      w = word.split('/')[0].lower()
+      if w in pos_words:
+         count += 1
+   return count 
+
+def feat26(twtt):
+   list_word = twtt.split()
+   count = 0;
+   for word in list_word:
+      w = word.split('/')[0].lower()
+      if w in neg_words:
+         count += 1
+   return count   
+
+
 if __name__ == "__main__":
 
    if len(sys.argv) <3 or len(sys.argv)>4 :
@@ -181,7 +217,9 @@ if __name__ == "__main__":
    if not os.path.exists(sys.argv[1]):
       print sys.argv[1] + " not exists"
       sys.exit(0)
-      
+   load_list("/u/cs401/Wordlists/Slang",mordern_slang)  
+   load_list("positive_words.txt",pos_words)  
+   load_list("negative_words.txt",neg_words) 
    twtt_file = open(sys.argv[1],'r')
    arff_file = open(sys.argv[2],'w')
    print >> arff_file, '@relation tweets_classification\n'
@@ -205,9 +243,13 @@ if __name__ == "__main__":
    print >> arff_file, '@attribute avg_len_sent numeric'
    print >> arff_file, '@attribute avg_len_token numeric'
    print >> arff_file, '@attribute num_sentences numeric'
-#   print >> arff_file, '@attribute neg_emoji numeric'
- #  print >> arff_file, '@attribute pos_emoji numeric'
-  # print >> arff_file, '@attribute neg_words numeric' 
+   print >> arff_file, '@attribute neg_emoji numeric'
+   print >> arff_file, '@attribute pos_emoji numeric'
+   print >> arff_file, '@attribute neg_slang numeric' 
+   #print >> arff_file, '@attribute pos_slang numeric'
+   print >> arff_file, '@attribute pos_words numeric'
+   print >> arff_file, '@attribute neg_word numeric'
+   
    print >> arff_file, '@attribute polarity {0,4}\n'
    
    print >> arff_file, '@data'

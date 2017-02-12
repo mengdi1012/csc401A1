@@ -222,7 +222,7 @@ if __name__ == "__main__":
    load_list("negative_words.txt",neg_words) 
    twtt_file = open(sys.argv[1],'r')
    arff_file = open(sys.argv[2],'w')
-   print >> arff_file, '@relation tweets_classification\n'
+   print >> arff_file, '@relation twit_classification\n'
    print >> arff_file, '@attribute 1st_person_pro numeric'
    print >> arff_file, '@attribute 2ndperson_pro numeric'
    print >> arff_file, '@attribute 3rdperson_pro numeric'

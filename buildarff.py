@@ -39,9 +39,9 @@ def collecting_data(twtt):
    list_data[22]= str(feat23(text))
    m = re.match(r'<A=(\d)>',list[0])
    #polarity number
-   list_data[23] = m.group(1)
+   list_data[20] = m.group(1)
    
-   return ','.join(list_data)
+   return ','.join(list_data[0:20])
 
 
 def feat1(twtt):
@@ -205,9 +205,9 @@ if __name__ == "__main__":
    print >> arff_file, '@attribute avg_len_sent numeric'
    print >> arff_file, '@attribute avg_len_token numeric'
    print >> arff_file, '@attribute num_sentences numeric'
-   print >> arff_file, '@attribute neg_emoji numeric'
-   print >> arff_file, '@attribute pos_emoji numeric'
-   print >> arff_file, '@attribute neg_words numeric' 
+#   print >> arff_file, '@attribute neg_emoji numeric'
+ #  print >> arff_file, '@attribute pos_emoji numeric'
+  # print >> arff_file, '@attribute neg_words numeric' 
    print >> arff_file, '@attribute polarity {0,4}\n'
    
    print >> arff_file, '@data'
